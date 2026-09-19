@@ -1,0 +1,20 @@
+name: 'dbt_tmdb'
+version: '1.0.0'
+config-version: 2
+
+profile: 'dbt_tmdb_profile'
+
+model-paths: ["models"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  dbt_tmdb:
+    staging:
+      +materialized: view
+      +schema: staging
+    marts:
+      +materialized: table
+      +schema: analytics

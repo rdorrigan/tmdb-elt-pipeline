@@ -1,0 +1,15 @@
+version: 2
+
+sources:
+  - name: raw_tmdb
+    description: "Raw landed TMDb JSON files loaded from GCS into BigQuery."
+    database: "{{ env_var('GCP_PROJECT_ID', 'your-gcp-project-id') }}"
+    schema: tmdb_raw
+    tables:
+      - name: movies_landed
+        description: "External table or native raw table containing raw_payload JSON."
+        columns:
+          - name: raw_payload
+            description: "Native BigQuery JSON type column containing complete TMDb response."
+          - name: loaded_at
+            description: "Timestamp when the batch was written into the table."
