@@ -3,7 +3,7 @@ version: 2
 sources:
   - name: raw_tmdb
     description: "Raw landed TMDb JSON files loaded from GCS into BigQuery."
-    database: "{{ env_var('GCP_PROJECT_ID', 'your-gcp-project-id') }}"
+    database: "{{ env_var('GCP_PROJECT_ID') }}"
     schema: tmdb_raw
     tables:
       - name: movies_landed
@@ -12,4 +12,4 @@ sources:
           - name: raw_payload
             description: "Native BigQuery JSON type column containing complete TMDb response."
           - name: loaded_at
-            description: "Timestamp when the batch was written into the table."
+            description: "Date when the batch was written into the table."

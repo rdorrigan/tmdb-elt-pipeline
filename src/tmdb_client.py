@@ -2,10 +2,11 @@ import time
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
-from src.config import TMDB_API_KEY, TMDB_BASE_URL
+from src.config import TMDB_API_TOKEN, TMDB_API_KEY, TMDB_BASE_URL
 
 class TMDbClient:
-    def __init__(self, api_key: str = TMDB_API_KEY):
+    def __init__(self, api_token: str = TMDB_API_TOKEN, api_key: str = TMDB_API_KEY):
+        self.api_token = api_token
         self.api_key = api_key
         self.base_url = TMDB_BASE_URL
         self.session = self._build_session()
@@ -20,10 +21,15 @@ class TMDbClient:
         )
         adapter = HTTPAdapter(max_retries=retries)
         session.mount("https://", adapter)
-        session.headers.update({
-            "Authorization": f"Bearer {self.api_key}",
-            "Content-Type": "application/json"
-        })
+        session.headers.update({"Content-Type": "application/json"})
+        assert any([x for x in [self.api_key,self.api_token]]), "API_KEY OR API_TOKEN ARE REQUIRED"
+        if self.api_token:
+            session.headers.update({
+                "Authorization": f"Bearer {self.api_token}",
+            })
+        else:
+            session.params = {"api_key" : self.api_key}
+        
         return session
 
     def get_movie_details(self, movie_id: int) -> dict | None:

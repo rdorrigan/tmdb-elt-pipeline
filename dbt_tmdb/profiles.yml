@@ -1,0 +1,11 @@
+dbt_tmdb_profile:
+  target: dev
+  outputs:
+    dev:
+      type: bigquery
+      method: oauth
+      project: "{{ env_var('GCP_PROJECT_ID') }}"
+      dataset: tmdb_staging  # Or your target dataset
+      threads: 4
+      timeout_seconds: 300
+      location: us-west1

@@ -1,0 +1,51 @@
+main:
+  steps:
+    - init:
+        assign:
+          - project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
+          - location: "us-west1"
+
+    # Step 1: Execute Python Extractor Job
+    - run_extractor:
+        call: googleapis.run.v1.namespaces.jobs.run
+        args:
+          name: ${"namespaces/" + project_id + "/jobs/tmdb-extractor-job"}
+          location: ${location}
+        result: extractor_execution
+
+    # # Step 2: Poll Extractor Execution Status
+    # - wait_for_extractor:
+    #     call: googleapis.run.v1.namespaces.executions.get
+    #     args:
+    #       name: ${extractor_execution.metadata.name}
+    #     result: extractor_status
+
+    # - check_extractor_status:
+    #     switch:
+    #       # If completed successfully
+    #       - condition: ${default(map.get(extractor_status, ["status", "succeededCount"]), 0) > 0}
+    #         next: run_dbt
+    #       # If failed
+    #       - condition: ${default(map.get(extractor_status, ["status", "failedCount"]), 0) > 0}
+    #         raise: "Extractor Job failed during execution."
+    #     next: sleep_extractor
+
+    # - sleep_extractor:
+    #     call: sys.sleep
+    #     args:
+    #       seconds: 10
+    #     next: wait_for_extractor
+
+    # Step 3: Trigger dbt Job
+    - run_dbt:
+        call: googleapis.run.v1.namespaces.jobs.run
+        args:
+          name: ${"namespaces/" + project_id + "/jobs/tmdb-dbt-job"}
+          location: ${location}
+        result: dbt_execution
+
+    - return_result:
+        return:
+          message: "Pipeline executed successfully!"
+          extractor_execution: ${extractor_execution.metadata.name}
+          dbt_execution: ${dbt_execution.metadata.name}
