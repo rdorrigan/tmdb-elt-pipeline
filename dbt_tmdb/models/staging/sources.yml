@@ -2,14 +2,24 @@ version: 2
 
 sources:
   - name: raw_tmdb
-    description: "Raw landed TMDb JSON files loaded from GCS into BigQuery."
+    description: "Raw TMDb movie payloads landed in GCS as NDJSON and exposed to BigQuery."
     database: "{{ env_var('GCP_PROJECT_ID') }}"
     schema: tmdb_raw
     tables:
       - name: movies_landed
-        description: "External table or native raw table containing raw_payload JSON."
+        description: >
+          View over the external table movies_landed_lines, which reads each line
+          of the NDJSON files in GCS as one raw string. See sql/bootstrap_raw_layer.sql.
         columns:
           - name: raw_payload
-            description: "Native BigQuery JSON type column containing complete TMDb response."
+            description: "Native BigQuery JSON column containing the complete TMDb response. NULL means the line failed to parse."
+            tests:
+              - not_null
+          - name: raw_line
+            description: "The unparsed source line, kept for debugging malformed rows."
+          - name: source_file
+            description: "Full gs:// URI of the file the row came from."
           - name: loaded_at
-            description: "Date when the batch was written into the table."
+            description: "Batch date (DATE, not a timestamp) parsed from the GCS path .../movies/YYYY/MM/DD/..."
+            tests:
+              - not_null

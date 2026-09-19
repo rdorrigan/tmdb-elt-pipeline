@@ -1,8 +1,11 @@
-import time
 import requests
 from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 from src.config import TMDB_API_TOKEN, TMDB_API_KEY, TMDB_BASE_URL
+
+# (connect, read) timeouts in seconds, so a stalled connection can't hang the job.
+REQUEST_TIMEOUT = (5, 30)
+
 
 class TMDbClient:
     def __init__(self, api_token: str = TMDB_API_TOKEN, api_key: str = TMDB_API_KEY):
@@ -22,14 +25,14 @@ class TMDbClient:
         adapter = HTTPAdapter(max_retries=retries)
         session.mount("https://", adapter)
         session.headers.update({"Content-Type": "application/json"})
-        assert any([x for x in [self.api_key,self.api_token]]), "API_KEY OR API_TOKEN ARE REQUIRED"
+        assert any([x for x in [self.api_key, self.api_token]]), "API_KEY OR API_TOKEN ARE REQUIRED"
         if self.api_token:
             session.headers.update({
                 "Authorization": f"Bearer {self.api_token}",
             })
         else:
-            session.params = {"api_key" : self.api_key}
-        
+            session.params = {"api_key": self.api_key}
+
         return session
 
     def get_movie_details(self, movie_id: int) -> dict | None:
@@ -38,8 +41,8 @@ class TMDbClient:
         params = {
             "append_to_response": "credits,keywords"
         }
-        response = self.session.get(url, params=params)
-        
+        response = self.session.get(url, params=params, timeout=REQUEST_TIMEOUT)
+
         if response.status_code == 200:
             return response.json()
         elif response.status_code == 404:

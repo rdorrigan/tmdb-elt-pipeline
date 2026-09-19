@@ -1,0 +1,13 @@
+version: 2
+
+models:
+  - name: dim_movies
+    description: "One row per movie, with financials and a cast summary."
+    columns:
+      - name: movie_id
+        tests:
+          - unique
+          - not_null
+      - name: total_cast_members
+        tests:
+          - not_null

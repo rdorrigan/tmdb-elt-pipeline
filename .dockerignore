@@ -1,0 +1,14 @@
+# Keeps the extractor image's build context small. The Dockerfile only copies
+# requirements.txt, src/ and main.py.
+.git
+.gitignore
+.env
+.env.*
+__pycache__/
+*.pyc
+.venv/
+venv/
+dbt_tmdb/
+sql/
+workflow.yaml
+README.md

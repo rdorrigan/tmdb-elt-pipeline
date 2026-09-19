@@ -1,0 +1,28 @@
+version: 2
+
+models:
+  - name: stg_tmdb__movies
+    description: "One row per movie, taken from the most recent landed batch."
+    columns:
+      - name: movie_id
+        tests:
+          - unique
+          - not_null
+      - name: title
+      - name: release_date
+        description: "NULL when TMDb has no (or an unparseable) release date."
+      - name: loaded_at
+        description: "Batch date of the file this row came from."
+
+  - name: stg_tmdb__cast
+    description: "One row per movie/cast-member pair, from each movie's most recent landed batch."
+    columns:
+      - name: movie_id
+        tests:
+          - not_null
+          - relationships:
+              to: ref('stg_tmdb__movies')
+              field: movie_id
+      - name: actor_id
+        tests:
+          - not_null

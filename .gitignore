@@ -1,0 +1,23 @@
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+
+# Secrets / credentials -- never commit these
+.env
+.env.*
+service-account*.json
+*-key.json
+*credentials*.json
+
+# dbt build artifacts
+dbt_tmdb/target/
+dbt_tmdb/logs/
+dbt_tmdb/dbt_packages/
+dbt_tmdb/.user.yml
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store

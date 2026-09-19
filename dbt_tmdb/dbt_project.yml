@@ -5,16 +5,18 @@ config-version: 2
 profile: 'dbt_tmdb_profile'
 
 model-paths: ["models"]
+macro-paths: ["macros"]
 target-path: "target"
 clean-targets:
   - "target"
   - "dbt_packages"
 
+# With macros/generate_schema_name.sql these are the literal BigQuery dataset names.
 models:
   dbt_tmdb:
     staging:
       +materialized: view
-      +schema: staging
+      +schema: tmdb_staging
     marts:
       +materialized: table
-      +schema: analytics
+      +schema: tmdb_analytics

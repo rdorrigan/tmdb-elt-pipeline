@@ -5,7 +5,10 @@ main:
           - project_id: ${sys.get_env("GOOGLE_CLOUD_PROJECT_ID")}
           - location: "us-west1"
 
-    # Step 1: Execute Python Extractor Job
+    # Step 1: Run the Python extractor job.
+    # The jobs.run connector pauses the workflow until the execution finishes
+    # (default timeout 30 min) and raises an error if the execution fails, so no
+    # manual polling is needed and dbt never runs after a failed extraction.
     - run_extractor:
         call: googleapis.run.v1.namespaces.jobs.run
         args:
@@ -13,30 +16,7 @@ main:
           location: ${location}
         result: extractor_execution
 
-    # # Step 2: Poll Extractor Execution Status
-    # - wait_for_extractor:
-    #     call: googleapis.run.v1.namespaces.executions.get
-    #     args:
-    #       name: ${extractor_execution.metadata.name}
-    #     result: extractor_status
-
-    # - check_extractor_status:
-    #     switch:
-    #       # If completed successfully
-    #       - condition: ${default(map.get(extractor_status, ["status", "succeededCount"]), 0) > 0}
-    #         next: run_dbt
-    #       # If failed
-    #       - condition: ${default(map.get(extractor_status, ["status", "failedCount"]), 0) > 0}
-    #         raise: "Extractor Job failed during execution."
-    #     next: sleep_extractor
-
-    # - sleep_extractor:
-    #     call: sys.sleep
-    #     args:
-    #       seconds: 10
-    #     next: wait_for_extractor
-
-    # Step 3: Trigger dbt Job
+    # Step 2: Run dbt (also waits for completion and raises on failure).
     - run_dbt:
         call: googleapis.run.v1.namespaces.jobs.run
         args:
